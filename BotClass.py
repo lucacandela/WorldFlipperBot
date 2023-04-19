@@ -96,8 +96,8 @@ class Bot:
 
         try:
             x0, y0, x1, y1 = win32gui.GetWindowRect(hwnd)
-            w = 422
-            h = 781
+            w = 540
+            h = 960
             xdiff = x1-x0
             ydiff = y1-y0
             if xdiff != w or ydiff != h:
