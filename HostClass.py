@@ -19,7 +19,7 @@ class HostBot(Bot):
         y1 = self.yOrigin+self.yOff + 567
         x2 = 540
         y2 = 170
-        recruit = self.LocateImageCenter("recruit",x1,y1,x2,y2,False,0.95)
+        recruit = self.LocateImageCenter("recruit",x1,y1,x2,y2,False,0.90)
         if recruit != None and self.recruitButtonClicked == False:
             self.click(recruit,0.4)
             self.recruitButtonClicked = True
@@ -29,11 +29,13 @@ class HostBot(Bot):
         x1 = self.xOrigin+self.xOff + 0
         y1 = self.yOrigin+self.yOff + 567
         x2 = 540
-        y2 = 170
+        y2 = 185
         recruit2 = self.LocateImageCenter("recruit2",x1,y1,x2,y2,True,0.8)
+        #self.screenshotRegion(x1,y1,x2,y2)
         if recruit2 != None:
             self.click(recruit2)
 
+    #Will tap start if 
     def tapStart(self,otherLeech):
         x1 = self.xOrigin+self.xOff + 0
         y1 = self.yOrigin+self.yOff + 567
@@ -54,12 +56,30 @@ class HostBot(Bot):
             start = self.LocateImageCenter("start",x1,y1,x2,y2,False,0.85)
             if leech1 != None and leech2 != None and start != None:
                 self.click(start)
+
+    def tapStartOnly2P(self):
+        x1 = self.xOrigin+self.xOff + 0
+        y1 = self.yOrigin+self.yOff + 580
+        x2 = 540
+        y2 = 170
+        start = self.LocateImageCenter("start",x1,y1,x2,y2,False,0.85)
+        #self.screenshotRegion(x1,y1,x2,y2)
+        if start != None:
+            x3 = self.xOrigin+self.xOff + 162
+            y3 = self.yOrigin+self.yOff + 267
+            x4 = 350
+            y4 = 75
+            leech1 = self.LocateImageCenter("leechname1",x3,y3,x4,y4,True,0.85) #Main character "Link" will always be leech1
+            start = self.LocateImageCenter("start",x1,y1,x2,y2,False,0.85)
+            if leech1 != None and start != None:
+                self.click(start)
+                self.recruitButtonClicked = False
     
     def exitMatch(self,pauseTime):
         x1 = self.xOrigin+self.xOff
-        y1 = self.yOrigin+self.yOff + 2
+        y1 = self.yOrigin+self.yOff + 10
         x2 = 80
-        y2 = 110
+        y2 = 120
         x3 = 540
         y3 = 457
         pause = self.LocateImageCenter("pause",x1,y1,x2,y2,True,0.75)
@@ -70,12 +90,14 @@ class HostBot(Bot):
 
         except:
             print("Unkown 'pause' error")
-        abort = self.LocateImageCenter("abort",x1,y2+500,x3,y3,True,0.93)
+        abort = self.LocateImageCenter("abort",x1,y2+600,x3,y3+200,True,0.93)
+        self.screenshotRegion(x1,y2+600,x3,y3+300)
         if abort != None:
             pauseTime += 0.3
-            self.click(abort)
+            self.click(abort,0.5)
 
-        abort2 = self.LocateImageCenter("abort2",x1,y2+598,x3,100,True,0.75)
+        abort2 = self.LocateImageCenter("abort2",x1,y2+650,x3,150,True,0.75)
+        #self.screenshotRegion(x1,y2+650,x3,150)
         if abort2 != None:
             self.click(abort2)
 
@@ -91,7 +113,7 @@ class HostBot(Bot):
         y4 = 525
         #checks to see if you're on the boss screen
         #self.screenshotRegion(x3,y3,x4,y4)
-        bosslist = self.LocateImageCenter("bosslist",x3,y3,x4,y4,True,0.85)
+        bosslist = self.LocateImageCenter("bosslist",x3,y3,x4,y4,False,0.98)
         #self.screenshotRegion(x3,y3,x4,y4)
         itemexchange = self.LocateImageCenter("itemexchange1",x3,y3,x4,y4,True,0.85)
         if itemexchange == None:
@@ -138,7 +160,10 @@ class HostBot(Bot):
             name = "whitetail"
             self.lookForBossRoom(newName + "1")
             self.lookForBossRoom(name + "2")
-
+        elif name == "bear":
+            name = "bear"
+            self.lookForBossRoom(newName+ "1")
+            self.lookForBossRoom(name+ "2")
         elif name == "admin" or name =="administrator":
             name = "admin"
             self.lookForBossRoom(newName+"1")
