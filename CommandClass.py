@@ -11,7 +11,7 @@ def basicCommands(bot):
     '''
     bot.tapToStart()
     bot.tapBossFight(True) #Parameter is true when Pickup event
-    bot.tapEventButton("eventbutton1")
+    #bot.tapEventButton("eventbutton1") only if going to event banner
     
     bot.tapBlueStacksCloseButton()
     bot.tapDialogueYes()
@@ -22,7 +22,7 @@ def basicCommands(bot):
     bot.checkConnectionError()
 
 def leechCommands(bot):
-    bot.tapHostRoom(hostName,True) #second parameter is True when pickup event is on
+    bot.tapHostRoom(hostName,False) #second parameter is True when pickup event is on
     bot.tapReadyCheck()
     bot.tapLeaveRoom(True)
     #bot.tapNext()
@@ -32,9 +32,10 @@ def hostCommands(bot):
         otherLeech = "WF Alt 2"
     else:
         otherLeech = "WF Alt 1"
-    bot.tapBossButton("regi",True) #second parameter is True when pickup event is on
+    bot.tapBossButton("golem",False) #second parameter is True when pickup event is on
     bot.tapCoop()
     bot.tapRecruit1()
     bot.tapRecruit2()
-    #bot.tapStart(otherLeech) #pass in the leechBot because it looks at its name
-    bot.exitMatch(10)
+    #bot.tapStart(otherLeech) # only if 3 players
+    bot.tapStartOnly2P() 
+    bot.exitMatch(7.5)
