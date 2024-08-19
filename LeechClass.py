@@ -14,7 +14,7 @@ class LeechBot(Bot):
             if pickup == True:
                 return self.LocateImageCenter(hostroomname+"PU",x1,y1,x2,y2,False,0.85)
             else:
-                return self.LocateImageCenter(hostroomname,x1,y1,x2,y2,False,0.85)
+                return self.LocateImageCenter(hostroomname,x1,y1,x2,y2,False,0.98)
         
         x1 = self.xOrigin+self.xOff
         y1 = self.yOrigin+self.yOff + 200
