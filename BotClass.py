@@ -1,11 +1,13 @@
 from ctypes.wintypes import HWND
 from faulthandler import cancel_dump_traceback_later
 import pyautogui
+import pyscreeze
 from pyautogui import *
 import time
 import os
-import win32api, win32con, win32gui
-
+import win32api, win32con, win32gui, win32com.client
+from pywinauto import mouse
+from pyscreeze import Box, Point
 class Bot:
     checktimer = 0
     gameopencheck = 0
@@ -13,6 +15,7 @@ class Bot:
         self.name = name
         self.changeOrigin(x,y)
         self.changeOffsets(0,0)
+        self.imageDirectory = "C:\\Users\\lucac\\Documents\\GitHub\\WorldFlipperBot"
     def changeOffsets(self,x,y):
         self.xOff = x
         self.yOff = y
@@ -24,14 +27,42 @@ class Bot:
     def getOrigin(self):
         return self.xOrigin,self.yOrigin
     
+    #Need to cast coordinates to all ints as for some reason top left are np.int64 and not int
+    def cast_to_int_Box(self, coords:tuple):
+        if coords is None:
+            return None
+        return Box(int(coords[0]),int(coords[1]),int(coords[2]),int(coords[3]))
+    
+    def cast_to_int_Point(self, coords:tuple):
+        if coords is None:
+            return None
+        return Point(int(coords[0]),int(coords[1]))
+    
+
     def LocateImageCenter(self,pic,x1,x2,x3,x4,gs,conf):
-        return pyautogui.locateCenterOnScreen("C:\\Users\\lucac\\Documents\\Coding\\Python\\WorldFlipperBot\\Images\\%s.png" % (pic),region=(x1,x2,x3,x4),grayscale = gs,confidence = conf)
+        try:
+            result = pyautogui.locateCenterOnScreen("%s\\Images\\%s.png" % (self.imageDirectory,pic),region=(x1,x2,x3,x4),grayscale = gs,confidence = conf)
+            return self.cast_to_int_Point((result.x,result.y))
+        except ImageNotFoundException:
+            pass
     def LocateImageCenterAnywhere(self,pic,gs,conf):
-        return pyautogui.locateCenterOnScreen("C:\\Users\\lucac\\Documents\\Coding\\Python\\WorldFlipperBot\\Images\\%s.png" %(pic),grayscale = gs,confidence = conf)
+        try:
+            result = pyautogui.locateCenterOnScreen("%s\\Images\\%s.png" % (self.imageDirectory,pic),grayscale = gs,confidence = conf)
+            return self.cast_to_int_Point((result.x,result.y))
+        except ImageNotFoundException:
+                pass
     def LocateImageCorner(self,pic,x1,x2,x3,x4,gs,conf):
-        return pyautogui.locateOnScreen("C:\\Users\\lucac\\Documents\\Coding\\Python\\WorldFlipperBot\\Images\\%s.png" % (pic),region=(x1,x2,x3,x4),grayscale = gs,confidence = conf)
+        try:
+            result = pyautogui.locateOnScreen("%s\\Images\\%s.png" % (self.imageDirectory,pic),region=(x1,x2,x3,x4),grayscale = gs,confidence = conf)
+            return self.cast_to_int_Box((result.left,result.top,result.width,result.height))
+        except ImageNotFoundException:
+            pass
     def LocateImageCornerAnywhere(self,pic,gs,conf):
-        return pyautogui.locateOnScreen("C:\\Users\\lucac\\Documents\\Coding\\Python\\WorldFlipperBot\\Images\\%s.png" %(pic),grayscale = gs,confidence = conf)
+        try:
+            result = pyautogui.locateOnScreen("%s\\Images\\%s.png" % (self.imageDirectory,pic),grayscale = gs,confidence = conf)
+            return self.cast_to_int_Box((result.left,result.top,result.width,result.height))
+        except ImageNotFoundException:
+            pass
 
     def click(self,target, timeToSleep = 0):
         win32api.SetCursorPos((target.x,target.y))
@@ -96,10 +127,14 @@ class Bot:
 
         try:
             x0, y0, x1, y1 = win32gui.GetWindowRect(hwnd)
-            w = 540
-            h = 960
+            
+            w = 582
+            h = 995
+            #self.screenshotRegion(x0,y0,w,h)
             xdiff = x1-x0
             ydiff = y1-y0
+            self.xOff = x0 - self.xOrigin
+            self.yOff = y0 - self.yOrigin
             if xdiff != w or ydiff != h:
                 win32gui.MoveWindow(hwnd,x0,y0,w,h,True)
                 win32gui.UpdateWindow(hwnd)
@@ -107,8 +142,12 @@ class Bot:
             print("Could not resize window to default size")
             print(e)
         try:
-            #wInt = 0 #starting process is 0, sub-process will be 1, etc...
+            #wInt = 2 #starting process is 0, sub-process will be 1, etc...
+            #self.list_window_names()
             #hwnd = self.get_inner_windows(hwnd,wInt)['RenderWindow']
+            mouse.move(coords=(-10000, 500))
+            win32com.client.Dispatch("WScript.Shell").SendKeys('%')
+            win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
             win32gui.SetForegroundWindow(hwnd)
             return True
         except Exception as e:
@@ -117,7 +156,7 @@ class Bot:
             return False
     def openWorldFlipper(self,timeBetweenOpen = 0.5):
         name = self.name
-        os.startfile("C:\\Users\\lucac\\Documents\\Coding\\Python\\WorldFlipperBot\\open "+name)
+        os.startfile("%s\\open %s" % (self.imageDirectory,name))
         time.sleep(timeBetweenOpen)
         time.sleep(20)
         self.checkIfGameOpened()
@@ -158,20 +197,26 @@ class Bot:
             print(e)
             self.openWorldFlipper(True)
 
-    def screenshotRegion(self,x1,y1,x2,y2):
-        iml = pyautogui.screenshot(region=(x1,y1,x2,y2))
-        iml.save(r"C:\\Users\\lucac\Documents\\Coding\\Python\savedimage.png")
+    def screenshotRegion(self,left,top,width,height):
+        iml = pyautogui.screenshot(region=(left,top,width,height))
+        iml.save(r"C:\\Users\\lucac\\Documents\\GitHub\\WorldFlipperBot\\savedimage.png")
 
     def findParentWindow(self):
-        parentWindow = self.LocateImageCorner(self.name,self.xOrigin+self.xOff,self.yOrigin+self.yOff,95,40,True,0.95)
+        #self.screenshotRegion(self.xOrigin+self.xOff,self.yOrigin+self.yOff,95,40)
+        parentWindow = self.LocateImageCorner(self.name,self.xOrigin+self.xOff,self.yOrigin+self.yOff,95,40,True,0.90)
 
         if (parentWindow == None):
             self.checktimer+=1
             if (self.bringToFront() == True):
                 print("Do something")
-            
-        parentWindow = self.LocateImageCornerAnywhere(self.name,True,0.98)
+
+        #If can't find, get the size of the window and search within that rectangle.
+        hwnd = win32gui.FindWindow(None, self.name)
+        x0, y0, x1, y1 = win32gui.GetWindowRect(hwnd)
+
+        parentWindow = self.LocateImageCorner(self.name,x0,y0,x1-x0,y1-y0,True,0.7)
         try:
+            
             self.xOff = parentWindow.left - self.xOrigin
             self.yOff = parentWindow.top - self.yOrigin
             self.checktimer = 0
@@ -216,7 +261,7 @@ class Bot:
         if pickup == True:
             bossfight = self.LocateImageCenter("bossfightPU",x1,y1,x2,y2,True,0.9)
         else:
-            self.screenshotRegion(x1,y1,x2,y2)
+            #self.screenshotRegion(x1,y1,x2,y2)
             bossfight = self.LocateImageCenter("bossfight",x1,y1,x2,y2,True,0.9)
         if bossfight != None:
             self.click(bossfight,1)
@@ -237,6 +282,7 @@ class Bot:
         x2 = 565
         y2 = 980
         okerror = self.LocateImageCenter("okerror",x1,y1,x2,y2,True,0.85)
+        #self.screenshotRegion(x1,y1,x2,y2)
         if okerror != None:
             self.click(okerror)
             return True
